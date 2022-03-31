@@ -1,2 +1,94 @@
 # GRM
 GRM - [G]rapheneOS [R]epo [M]anager
+
+A graphical UI for managing a custom Apps [repository](https://github.com/GrapheneOS/apps.grapheneos.org) for [Graphene OS](https://grapheneos.org/)
+
+# Requirements
+
+## Supported Operating Systems
+
+While GRM runs on any Linux natively it can be used on any Operating System which supports [docker](https://www.docker.com).
+
+## Apps Repository
+
+You have to setup your repository like described in the Graphene OS README (currently available [here](https://github.com/steadfasterX/apps.grapheneos.org/blob/sfX-guide/README.md) until accepted [upstream](https://github.com/GrapheneOS/apps.grapheneos.org))
+
+# Installation
+
+## Linux
+
+1. `git clone https://github.com/sfX-android/GRM.git /opt/GRM`
+2. create the file `/opt/GRM/custom.vars` with the following content:
+~~~
+export SSHUSER=<PUT-YOUR-USERNAME-HERE>
+export REPOSERVER=<PUT-YOUR-SSH-SERVER-HERE>
+export REPOPATH=<PUT-REMOTE-SERVERPATH-HERE>
+~~~
+
+## SSH keys
+
+Create SSH keys for GRM to access your repository server. If your current Operating System is not Linux just do these commands on your repository server and scp or copy & paste the keys locally.
+
+### Docker users only
+1. create a directory for your GRM data, eg. name it "GRM"
+2. create these subdirectories (exactly named like that) in "GRM":
+    - `ssh` (you need to put the SSH keys here)
+    - `apps` (all APKs in this directory will be available in GRM later)
+
+### Linux & Docker users
+1. Create a key named `GRM_ed25519` (this filename is fixed):
+   <br/>`ssh-keygen -a 100 -t ed25519 -f GRM_ed25519`
+   <br/>when prompted for a password simply press ENTER twice (required)
+2. add `GRM_ed25519.pub` to your `./ssh/authorized_keys` on your repository server (GRM supports only ssh pub key auth)
+3. put the SSH key files into the folder `ssh`
+   - docker: `GRM/ssh` (see above)
+   - Linux: `/opt/GRM/ssh`
+4. verify that your SSH user can access your server without being prompted:
+   - docker: _use a SSH client and add the GRM_ed25519 key there for authentication_
+   - Linux: `ssh -i /opt/GRM/ssh/GRM_ed25519 <PUT-YOUR-USERNAME-HERE>@<PUT-YOUR-SSH-SERVER-HERE>`
+5. if you see a hostkey verification prompt accept it but you should be logged in without specifying a password. If you get prompted for a password something is wrong in your setup which needs to be fixed first before you can proceed!
+
+
+## Docker
+
+### build the GRM image (one time)
+
+~~~
+docker build -t grm:latest .
+~~~
+
+### create a GRM container (one time)
+
+when creating the container 2 paths will be mapped which are both needed so GRM works properly:
+
+  - ssh
+  - apps
+
+See [SSH keys](README.md#docker-users-only) for where to find them and their meaning.
+
+1. Open a terminal/shell in the directory where these 2 directories are located. If you want to skip this step you have to adjust the `src` paths in the following create command
+2. Create the container with:
+~~~
+docker create --net=host --name=grm \
+    --env='SSHUSER=<PUT-YOUR-USERNAME-HERE>'
+    --env='REPOSERVER=<PUT-YOUR-SSH-SERVER-HERE>'
+    --env='REPOPATH=<PUT-REMOTE-SERVERPATH-HERE>'
+    --env='DISPLAY'
+    --mount src="$(pwd)/apps",target=/0_GRM,type=bind
+    --mount src="$(pwd)/ssh",target=/opt/GRM/ssh,type=bind
+    grm:latest
+~~~
+
+
+## start GRM
+
+### Linux
+
+`/opt/GRM/grm`
+
+### docker
+
+`docker start grm`
+
+
+
