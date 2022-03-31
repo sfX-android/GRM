@@ -1,0 +1,49 @@
+#!/bin/bash
+##################################################################################
+#
+# GRM - [G]rapheneOS [R]epo [M]anager
+#
+# Copyright: 2022, steadfasterX <steadfasterX [AT] gmail [DOT] com>
+#
+##################################################################################
+
+# the vars
+VARS="${0%/*}/grm.vars"
+source $VARS
+[ $? -ne 0 ] && "ERROR: Missing requirement <$VARS>." && exit 3
+
+# the functions
+FUNCS="${0%/*}/grm.func"
+source $FUNCS
+[ $? -ne 0 ] && "ERROR: Missing requirement <$FUNCS>." && exit 3
+
+# start logging
+[ -f "$LOG" ] && echo "backing up old logfile...." && cp -f $LOG ${LOG}.old
+echo -e "$(date '+%F %T'): Starting $TNAME v${VERSION}!\n****************************************************\n" > $LOG
+
+# collect some sys info
+F_LOG "OS: $(cat /etc/*-release)"
+F_LOG "OS (lsb): $(lsb_release -a)"
+F_LOG "yad: $(yad --version)"
+F_LOG "systemd summary:\n $(hostnamectl status |grep -v ID)\n"
+
+# main func
+F_MAIN(){
+    F_LOG "$FUNCNAME: starting menu"
+    $FYAD --title="$YTITLE" --scroll --image="$SICONS/grm_big.png" --width=850 --height=320 --fixed --scroll --text "\n  <b>$TFULLNAME</b>\n\n   GRM is a tool for managing a GrapheneOS repository\t\t\n\n" \
+          --buttons-layout=spread \
+          --button=" Log!$SICONS/log_48x48.png":"$MYPATH/getlog" \
+          --button=" List/Remove Apps!$SICONS/list_48x48.png!List current repo content or remove an existing app":"bash -c F_LISTAPPS" \
+          --button=" Add/Update App!$SICONS/upload_48x48.png!Add a new app or update an existing one":"bash -c F_ADDAPP" 
+}
+
+# check first run
+F_INITCHK(){
+    [ ! -f "$MYPATH/${TNAME}.init" ] && F_INIT && F_LOG "$FUNCNAME init done successfully"
+}
+F_INITCHK >> ${LOG} 2>&1
+
+# main func
+F_MAIN
+
+F_EXIT "main->end" 0 full

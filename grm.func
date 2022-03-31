@@ -1,0 +1,422 @@
+#!/bin/bash
+##########################################################################
+## @file			grm.func
+## @brief			The heart of GRM - all global functions
+## @author			steadfasterX <steadfasterX -AT- gmail -DOT- com>
+## @date                        2022
+## @copyright			LGPL v2.1
+## @details                     GRM - [G]rapheneOS [R]epo [M]anager
+##
+## global functions
+##
+## include this with:
+## source grm.func
+#
+##########################################################################
+# doxygen copy templates:
+#
+# # @var 
+# # @brief 
+# # @showinitializer
+# # @details 
+#
+# # @fn F_NAME()
+# # @brief ..
+# # @param 1 ..
+# # @return ..
+# # @exception ..
+# # @details ..
+#
+##########################################################################
+VARS="${0%/*}/grm.vars"
+
+source "$VARS"
+[ $? -ne 0 ]&& echo "ERROR: including $VARS" && exit 3
+
+######################################################################################
+
+# do not echo but write log entry
+F_LOG(){
+    # takes 1 argument
+    # 1 => Message to log/echo (can handle \t and \n)
+  
+    echo -e "$(date '+%F %T'): $1" >> $LOG
+}; export -f F_LOG
+
+# echo output and save it in a log as well
+F_ELOG(){
+  # takes 1 argument
+  # 1 => Message to log/echo (can handle \t and \n)
+  
+  echo -e "$(date '+%F %T'): $1" | tee -a $LOG
+
+}; export -f F_ELOG
+
+######################################################################################
+
+# print a message
+F_MSG(){ F_LOG "$FUNCNAME: started"
+    # takes 2 arguments
+    #   
+    #  1 => box width
+    #  2 => message to show
+    # optional:
+    #  3 => free args
+    $FYAD --width=$1 --title="$YTITLE" --text "$2" $3
+    RET=$?
+    F_LOG "$2"
+    F_LOG "$FUNCNAME: ended"
+    echo $RET
+}; export -f F_MSG
+
+# print an error message
+F_MSGE(){ F_LOG "$FUNCNAME: started"
+    # takes up to 3 arguments
+    #
+    # 1 => width
+    # 2 => message
+    #
+    # optional:
+    # 3 => yad stuff
+    
+    $FYAD --width="$1" --title="$YTITLE - ERROR" --image="$SICONS/error.png" --text "ERROR:\n\n$2" $3 --button=Exit:0
+    RES=$?
+    F_LOG "ERROR: $2"
+    F_LOG $RES
+    echo $RES
+}; export -f F_MSGE
+
+# print an OK message
+F_MSGOK(){ F_LOG "$FUNCNAME: started"
+    # takes up to 3 arguments
+    #
+    # 1 => width
+    # 2 => message
+    #
+    # optional:
+    # 3 => yad stuff
+
+    $FYAD --width="$1" --title="$YTITLE - SUCCESS" --image="$SICONS/ok_64x64.png" --text "\n$2" $3 --button=Close:0
+    RES=$?
+    F_LOG "$2"
+    F_LOG $RES
+    echo $RES
+}; export -f F_MSGOK
+
+# print a warning message
+F_MSGW(){ F_LOG "$FUNCNAME: started"
+    # takes up to 3 arguments
+    #
+    # 1 => width
+    # 2 => message
+    #
+    # optional:
+    # 3 => yad stuff
+
+    $FYAD --width="$1" --title="$YTITLE - WARNING" --image="$SICONS/warning_64x64.png" --text "\n$2" $3 --button=Close:0
+    RES=$?
+    F_LOG "$2"
+    F_LOG $RES
+    echo $RES
+}; export -f F_MSGW
+
+# check errorcode + exit when not errorcode not as expected
+F_ERR(){ F_LOG "$FUNCNAME: started"
+  # takes 2-4 arguments
+  #
+  # mandantory:
+  #   1 => the process initiating this function
+  #   2 => the errorcode (usually $? in your call)
+  # optional (4 requires at least an empty 3):
+  #   3 => the message to show
+  #   4 => the expected error code (if missing we expect 0)
+  #   5 => yad code for F_MSGE (requires at least emtpy 3 and 4)
+  CALLER=$1
+  ERRCODE=$2
+  MSG="$3"
+  EXPECTED=$4
+  YADSTUFF="$5"
+
+  [ -z "$EXPECTED" ] && EXPECTED=0
+  
+  if [ -z "$CALLER" ]||[ -z "$ERRCODE" ];then
+    F_ELOG "Required argument missing in $FUNCNAME!"
+    F_EXIT $FUNCNAME 3
+  fi
+  if [ "$ERRCODE" != "$EXPECTED" ];then
+    F_ELOG "ERROR: $ERRCODE occurred in $CALLER (expected $EXPECTED, got $ERRCODE)"
+    [ ! -z "$MSG" ] && F_MSGE 800 "$MSG" "$YADSTUFF"
+    F_EXIT "${CALLER}->${FUNCNAME}" 4
+  else
+    echo "OK: $CALLER"
+  fi
+}; export -f F_ERR
+
+# exit properly
+F_EXIT(){ F_LOG "$FUNCNAME: started"
+  # takes 3 arguments
+  # mandantory:
+  #   1 => the function or reason who calls the exit function
+  #   2 => the exitcode to be used
+  #
+  # optional:
+  #   3 => type: cleaning lock file (full) or just close (when not set)
+  EREASON=$1
+  ECODE=$2
+  ETYPE=$3
+  
+  F_ELOG "EXIT: $EREASON with code $ECODE"
+  
+  [ "$ETYPE" == "full" ] && rm -vf $LOCKFILE >> $LOG
+
+  exit $ECODE
+  F_LOG "$FUNCNAME: ended"
+}; export -f F_EXIT
+
+###############################################################################################
+
+# about/support screen
+F_ABOUT(){ F_LOG "$FUNCNAME: started"
+    # takes no args
+
+    $FYAD --image="$SICONS/logo_128x128.png" --title="$YTITLE - ABOUT" --width=800 --height=500 --fixed --text \
+"\n  $TNAME is based on:\n\t- <a href='https://sourceforge.net/projects/yad-dialog'>YAD</a> - without this no GUI\n\
+\t- the awesome <a href='https://github.com/Lekensteyn/lglaf'>LGLAF</a> code by Peter Wu\n\
+\t- <a href='https://github.com/ehem/kdztools'>kdztools</a> by Elliott Mitchell\n\
+\t- <b>MANY</b> enhancements by steadfasterX (including this GUI)\n\n\
+  ${TNAME} sources:\n\
+\t- <a href='https://github.com/steadfasterX/salt'>$TNAME</a>\n\
+\t- <a href='https://github.com/steadfasterX/lglaf'>Patched LGLAF</a>\n\
+\t- <a href='https://github.com/steadfasterX/salt'>Patched kdztools</a>\n\n\
+  $TNAME support: <a href='https://tinyurl.com/SALTatXDA'>XDA thread</a>\n\n\
+  Special credits:\n\
+\t- <a href='https://github.com/tuxuser/'>tuxuser</a> for making LAF communication on Nougat possible and for his great support!\n\n\
+  Images/Icons:\n\
+\t- SALT logo is created by <a href='https://github.com/steadfasterX'>steadfasterX</a> and licensed under <a href='https://creativecommons.org/licenses/by-sa/4.0/'>CC BY-SA 4.0</a>.\n\
+\t- CR icon by RRZEicons <a href='https://creativecommons.org/licenses/by-sa/3.0'>CC BY-SA 3.0</a> from Wikimedia Commons. Modified in size." \
+        --button=Close:0
+}; export -f F_ABOUT
+
+# Update everything!
+F_UPDATE(){ F_LOG "$FUNCNAME: started"
+    # takes no arguments
+    #
+    CNT=0
+    for u in ${MYPATH},$MYGIT; do
+        CNT=$((CNT+1))
+        F_LOG "$FUNCNAME: updating ${u/,*} on branch ${u/*,} ..."
+        echo "${CNT}:5"
+        cd ${u/,*}
+        echo "${CNT}:10"
+        F_LOG "$FUNCNAME: git checkout:\n$($GIT checkout ${u/*,} 2>&1)"
+        F_LOG "$FUNCNAME: git pull:\n"
+        $GIT pull 2>&1 | tee -a $LOG | sed "s/^/${CNT}:#/g"
+        test ${PIPESTATUS[0]} -eq 0 && echo "${CNT}:100"
+    done | $FYAD --title="$YTITLE - UPDATING" --text="\n  <b>Be patient while freshen up your installation...</b>\n  (if a progress bar do NOT get to 100% a manual update is required)\n\n" --width 800 --multi-progress --bar="Main codebase":norm --button=Close
+    F_MSGW 600 "You must restart ROME if you have updated before the changes become active.  " "--fixed"
+    F_LOG "$FUNCNAME: ended"
+}; export -f F_UPDATE
+
+# prepare remote repo
+F_PREPARE(){ F_LOG "$FUNCNAME: started with this args: $@"
+
+    CMD="rm upload/*"
+    F_SSHCMD
+
+    SCPFILE=/tmp/$UPDATEEXEC
+    cat > $SCPFILE << _EOCMD
+#!/bin/bash
+
+cd $REPOPATH
+./generate.py
+
+ERR=\$?
+if [ \$ERR -eq 0 ];then
+  echo "Updated repo successfully!"
+else
+  echo "Error \$ERR occured while updating repo!"
+fi
+exit \$ERR
+_EOCMD
+    chmod +x $SCPFILE
+    F_SCPFILE
+
+    F_LOG "$FUNCNAME ended with $ERR"
+}; export -f F_PREPARE
+
+# will set any host key as valid so should be used once only on initial use
+F_INIT(){
+    ssh -o 'StrictHostKeyChecking=no' -o 'IdentitiesOnly yes' -i $SSHKEY ${SSHUSER}@${REPOSERVER} true
+    [ $? -eq 0 ] && touch "$MYPATH/${TNAME}.init"
+}; export -f F_INIT
+
+# run a SIMPLE remote command
+F_SSHCMD(){ F_LOG "$FUNCNAME: started with this args: $@"
+    # requires CMD var to be set
+    [ -z "$CMD" ] && F_LOG "empty CMD var!!!!" && return 3
+
+    ssh -o 'IdentitiesOnly yes' -i $SSHKEY ${SSHUSER}@${REPOSERVER} "$CMD"
+    ERR=$?
+
+    F_LOG "$FUNCNAME ended with $ERR"
+    return $ERR
+}; export -f F_SSHCMD
+
+# run a COMPLEX remote command
+F_SCPEXEC(){ F_LOG "$FUNCNAME: started with this args: $@"
+    
+    [ -z "$SCPFILE" ] && F_LOG "empty SCPFILE var!!!!" && return 3
+    chmod +x $SCPFILE
+    F_SCPFILE
+    CMD="./upload/${SCPFILE##*/}"
+    F_SSHCMD
+
+    F_LOG "$FUNCNAME ended with $ERR"
+    return $ERR
+}; export -f F_SCPEXEC
+
+# run a COMPLEX remote command
+F_SCPFILE(){ F_LOG "$FUNCNAME: started with this args: $@"
+    # requires SCPFILE var to be set
+    [ -z "$SCPFILE" ] && F_LOG "empty SCPFILE var!!!!" && return 3
+
+    scp -p -o 'IdentitiesOnly yes' -i $SSHKEY $SCPFILE ${SSHUSER}@${REPOSERVER}:./upload/ 2>&1 >> $LOG
+    ERR=$?
+    if [ "$ERR" -eq 0 ];then
+        F_LOG "$FUNCNAME transferring $SCPFILE to $REPOSERVER was successful"
+    else
+        F_LOG "$FUNCNAME Error $ERR occured while transferring $SCPFILE to $REPOSERVER"
+    fi
+
+    F_LOG "$FUNCNAME ended with $ERR"
+    return $ERR
+}; export -f F_SCPFILE
+
+# calc message length
+F_MSGLEN(){
+    F_LOG "$FUNCNAME started with $1"
+    MSG="$1"
+    MSGLENGTH=$((${#MSG} + 300))
+    F_LOG "$FUNCNAME calculated a message length of: $MSGLENGTH"
+    echo $MSGLENGTH
+    F_LOG "$FUNCNAME ended"
+}; export -f F_MSGLEN
+
+# wait dialog
+F_WAITBOX(){
+    F_LOG "$FUNCNAME started with $1"
+    unset MSG
+    MSG="$1"
+    MINLENGTH=$(F_MSGLEN "SORM v$VERSION")
+    MSGLENGTH=$(F_MSGLEN "$MSG")
+    [ "$MSGLENGTH" -lt "$MINLENGTH" ] && MSGLENGTH=$MINLENGTH
+    for i in $(seq 20 100);do echo $i ; sleep 1; done | $FYAD --width=$MSGLENGTH --progress --auto-close --pulsate --hide-text --text "\n$MSG" &
+    WBPID=$!
+    F_LOG "$FUNCNAME WBPID is $WBPID"
+    F_LOG "$FUNCNAME ended"
+    echo $WBPID > /tmp/sorm_$FUNCNAME.pid
+}; export -f F_WAITBOX
+
+# list all repo apps
+F_LISTAPPS(){ F_LOG "$FUNCNAME: started with this args: $@"
+    # Takes no argument
+
+    unset FORMFIELDS
+
+    F_WAITBOX "...parsing remote app repo on $REPOSERVER"
+    KPID=$(cat /tmp/sorm_F_WAITBOX.pid)
+    F_LOG "$FUNCNAME PID is $KPID"
+
+    CMD="jq -r .time $REPOPATH/apps/metadata.0.json"
+    LTIME=$(F_SSHCMD)
+    RTIME=$(date --date @$LTIME)
+
+    SCPFILE="/tmp/cmd.sh"
+    cat > $SCPFILE << _EOFCMD
+for p in \$(jq -r '.apps | keys[]' $REPOPATH/apps/metadata.0.json);do 
+    printf \$p: ; jq -r '.apps.'\"\$p\"'.stable[].label' $REPOPATH/apps/metadata.0.json
+done
+_EOFCMD
+    ALLAPPS=$(F_SCPEXEC | tr -d " ")
+
+    kill $KPID
+
+    F_LOG "$FUNCNAME ALLAPPS: $ALLAPPS"
+
+    # list all apps
+    for a in $ALLAPPS; do
+        LISTFIELDS="$LISTFIELDS false ${a/*:} ${a/:*}"
+    done
+    F_LOG "$ALLAPPS, $LISTFIELDS"
+    RMAPPS=$($FYAD --height=800 --width=500 --print-column=3 --text "\nThe following apps are currently deployed on $REPOSERVER\nLast updated on: $RTIME\n" --list --checklist --column=Selection:CHK --column="App name:TXT" --column="Package name:TXT" $LISTFIELDS --button=Close:0 --button="Remove Selected:10" | tr "\n" " ")
+
+    # remove apps if any selected
+    F_LOG "$FUNCNAME Apps selected for removal: $RMAPPS"
+    [ ! -z "$RMAPPS" ] && F_RMAPPS
+
+    F_LOG "$FUNCNAME ended"
+}; export -f F_LISTAPPS
+
+# delete apps
+F_RMAPPS(){ F_LOG "$FUNCNAME: started with this args: $@"
+    [ -z "$RMAPPS" ] && F_LOG "$FUNCNAME empty RMAPPS var!!!!" && return 3
+
+    # prep orphan dir
+    CMD="[ ! -d $REPOPATH/deleted-apps/ ] && mkdir $REPOPATH/deleted-apps/"
+    F_SSHCMD
+
+    for app in $(echo "$RMAPPS" | tr "|" " ");do
+        CMD="cp -a $REPOPATH/apps-stable/$app $REPOPATH/deleted-apps/ ; rm -rf $REPOPATH/apps-stable/$app"
+        F_SSHCMD
+        [ $ERR -ne 0 ] && F_LOG "$FUNCNAME Error $ERR occured while uploading $apk" && F_MSGE 800 "Error $ERR occured while removing $app"
+        [ $ERR -ne 0 ] && return 3
+    done
+
+    F_ACTIVATE
+    F_LOG "$FUNCNAME ended"
+}; export -f F_RMAPPS
+
+# add app
+F_ADDAPP(){ F_LOG "$FUNCNAME: started with this args: $@"
+    SELAPK=$($FYAD --height=800 --width=800 --file --multiple --separator=" " --file-filter="APK|*.apk")
+    [ $? -ne 0 ] && return 3
+    F_PREPARE
+
+    for apk in $SELAPK;do
+        F_WAITBOX "... uploading to $REPOSERVER:\n\n\t${apk##*/}\n"
+        KPID=$(cat /tmp/sorm_F_WAITBOX.pid)
+        SCPFILE=$apk
+        F_SCPFILE
+        ERR=$?
+        kill $KPID
+        [ $ERR -ne 0 ] && F_LOG "$FUNCNAME Error $ERR occured while uploading $apk" && F_MSGE 800 "Error $ERR occured while uploading:\n\n$apk"
+        [ $ERR -ne 0 ] && return 3
+        SCPFILE="/tmp/${apk##*/}.sh"
+        cat > $SCPFILE << _EOCMD
+PKGNAME=\$(aapt d badging upload/${apk##*/} | awk '/package/{gsub("name=|'"'"'","");  print \$2}')
+[ ! -d "$REPOPATH/apps-stable/\$PKGNAME" ] && mkdir -p $REPOPATH/apps-stable/\$PKGNAME
+mv upload/${apk##*/} $REPOPATH/apps-stable/\$PKGNAME/base.apk
+_EOCMD
+        F_SCPEXEC
+    done
+
+    F_MSGOK 500 "Successfully uploaded all APKs!"
+    F_ACTIVATE
+
+    F_LOG "$FUNCNAME ended"
+}; export -f F_ADDAPP
+
+F_ACTIVATE(){ F_LOG "$FUNCNAME: started with this args: $@"
+    F_WAITBOX "... activating APK changes on $REPOSERVER"
+    KPID=$(cat /tmp/sorm_F_WAITBOX.pid)
+    # activate changes
+    CMD="./upload/$UPDATEEXEC"
+    F_SSHCMD
+    if [ $? -eq 0 ];then
+        F_MSGOK 400 "Repo update finished successfully!"
+    else
+        F_LOG "$FUNCNAME Error $? occured while activating new APKs" && F_MSGE 800 "Error occured while activating repo changes! SHARE THE LOG!"
+    fi
+    kill $KPID
+    F_LOG "$FUNCNAME ended"
+}; export -f F_ACTIVATE
