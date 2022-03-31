@@ -3,6 +3,11 @@ GRM - [G]rapheneOS [R]epo [M]anager
 
 A graphical UI for managing a custom Apps [repository](https://github.com/GrapheneOS/apps.grapheneos.org) for [Graphene OS](https://grapheneos.org/)
 
+## IMPORTANT HINT
+
+GRM is not related to the Graphene project in any way. It is just a personal project and comes without any guarantees ;)
+
+
 # Requirements
 
 ## Supported Operating Systems
