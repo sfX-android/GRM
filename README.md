@@ -1,18 +1,24 @@
 # GRM
 GRM - [G]rapheneOS [R]epo [M]anager
 
-A graphical UI for managing a custom Apps [repository](https://github.com/GrapheneOS/apps.grapheneos.org) for [Graphene OS](https://grapheneos.org/)
+A graphical UI for managing a custom Apps [repository](https://github.com/GrapheneOS/apps.grapheneos.org) for [GrapheneOS](https://grapheneos.org/)
+
 
 ## IMPORTANT HINT
 
 GRM is not related to the Graphene project in any way. It is just a personal project and comes without any guarantees ;)
 
+_The GrapheneOS name and logo are trademarks of the [GrapheneOS](https://grapheneos.org/) project._
 
 # Requirements
 
 ## Supported Operating Systems
 
-While GRM runs on any Linux natively it can be used on any Operating System which supports [docker](https://www.docker.com).
+While GRM runs on any Linux natively it can be used on any Operating System which supports [docker](https://www.docker.com), which means:
+
+- Windows
+- Linux
+- Mac OS
 
 ## Apps Repository
 
@@ -30,7 +36,7 @@ export REPOSERVER=<PUT-YOUR-SSH-SERVER-HERE>
 export REPOPATH=<PUT-REMOTE-SERVERPATH-HERE>
 ~~~
 
-## SSH keys
+## Linux & docker: SSH keys
 
 Create SSH keys for GRM to access your repository server. If your current Operating System is not Linux just do these commands on your repository server and scp or copy & paste the keys locally.
 
@@ -56,44 +62,10 @@ Create SSH keys for GRM to access your repository server. If your current Operat
 
 ## Docker
 
-### build the GRM image (one time)
-
-~~~
-docker build -t grm:latest .
-~~~
-
-### create a GRM container (one time)
-
-when creating the container 2 paths will be mapped which are both needed so GRM works properly:
-
-  - ssh
-  - apps
-
-See [SSH keys](README.md#docker-users-only) for where to find them and their meaning.
-
-1. Open a terminal/shell in the directory where these 2 directories are located. If you want to skip this step you have to adjust the `src` paths in the following create command
-2. Create the container with:
-~~~
-docker create --net=host --name=grm \
-    --env='SSHUSER=<PUT-YOUR-USERNAME-HERE>'
-    --env='REPOSERVER=<PUT-YOUR-SSH-SERVER-HERE>'
-    --env='REPOPATH=<PUT-REMOTE-SERVERPATH-HERE>'
-    --env='DISPLAY'
-    --mount src="$(pwd)/apps",target=/0_GRM,type=bind
-    --mount src="$(pwd)/ssh",target=/opt/GRM/ssh,type=bind
-    grm:latest
-~~~
-
+Follow the [Docker guide](DOCKER.md) 
 
 ## start GRM
 
 ### Linux
 
 `/opt/GRM/grm`
-
-### docker
-
-`docker start grm`
-
-
-
