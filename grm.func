@@ -193,21 +193,27 @@ F_EXIT(){ F_LOG "$FUNCNAME: started"
 F_ABOUT(){ F_LOG "$FUNCNAME: started"
     # takes no args
 
-    $FYAD --image="$SICONS/logo_128x128.png" --title="$YTITLE - ABOUT" --width=800 --height=500 --fixed --text \
-"\n  $TNAME is based on:\n\t- <a href='https://sourceforge.net/projects/yad-dialog'>YAD</a> - without this no GUI\n\
-\t- the awesome <a href='https://github.com/Lekensteyn/lglaf'>LGLAF</a> code by Peter Wu\n\
-\t- <a href='https://github.com/ehem/kdztools'>kdztools</a> by Elliott Mitchell\n\
-\t- <b>MANY</b> enhancements by steadfasterX (including this GUI)\n\n\
-  ${TNAME} sources:\n\
-\t- <a href='https://github.com/steadfasterX/salt'>$TNAME</a>\n\
-\t- <a href='https://github.com/steadfasterX/lglaf'>Patched LGLAF</a>\n\
-\t- <a href='https://github.com/steadfasterX/salt'>Patched kdztools</a>\n\n\
-  $TNAME support: <a href='https://tinyurl.com/SALTatXDA'>XDA thread</a>\n\n\
-  Special credits:\n\
-\t- <a href='https://github.com/tuxuser/'>tuxuser</a> for making LAF communication on Nougat possible and for his great support!\n\n\
-  Images/Icons:\n\
-\t- SALT logo is created by <a href='https://github.com/steadfasterX'>steadfasterX</a> and licensed under <a href='https://creativecommons.org/licenses/by-sa/4.0/'>CC BY-SA 4.0</a>.\n\
-\t- CR icon by RRZEicons <a href='https://creativecommons.org/licenses/by-sa/3.0'>CC BY-SA 3.0</a> from Wikimedia Commons. Modified in size." \
+    $FYAD --image="$SICONS/grm_big.png" --title="$YTITLE - ABOUT" --width=800 --height=500 --fixed --text \
+"\n  <b>$TNAME is based on / Credits:</b>\n\t- <a href='https://sourceforge.net/projects/yad-dialog'>YAD</a> - without this no GUI\n\
+\t- <a href='https://www.docker.com'>Docker</a> for the $TNAME docker releases\n\
+\t\t-> <a href='https://github.com/phusion/baseimage-docker/'>Phusion</a> for the minimal Ubuntu container\n\
+\t\t-> <a href='https://www.xquartz.org'>XQuartz</a> for using X on Mac\n\
+\t\t-> <a href='https://sourceforge.net/projects/vcxsrv/'>VcXsrv</a> for using X on Windows\n\
+\t\t-> <a href='https://docs.gtk.org/gtk3/broadway.html'>GTK project</a> for using $TNAME <b>without</b> X on Windows and Mac\n\
+\t- the work by <a href='https://github.com/steadfasterX'>steadfasterX</a> so you can actually do what you can do with GRM ;)  \n\n\
+  <b>Source code:</b>\n\
+\t- <a href='https://github.com/sfX-Android/GRM'>$TNAME</a>\n\
+\t- <a href='https://github.com/GrapheneOS/apps.grapheneos.org'>apps.grapheneos.org</a>\n\n\
+  <b>Support:</b>\n\
+\t- [matrix]:\t<a href='https://matrix.to/#/#sfX_Android:matrix.org'>#sfX_Android:matrix.org</a>\n\
+\t- Telegram:\t<a href='https://t.me/sfX_android'>sfX_android</a>\n\n\
+  <b>Images/Icons:</b>\n\
+\t- The $TNAME logo is created by <a href='https://github.com/steadfasterX'>steadfasterX</a> and licensed under <a href='https://creativecommons.org/publicdomain/zero/1.0/'>CC0 1.0</a>\n\
+\t- <a href='https://commons.wikimedia.org/wiki/File:Earth_clip_art.svg'>$TNAME logo</a> (modified in size + added several resized Package icons)\n \
+\t- <a href='https://commons.wikimedia.org/wiki/File:Nuvola_apps_package.png'>Package</a> (modified in size)\n \
+\t- <a href='https://commons.wikimedia.org/wiki/File:Nuvola_apps_kthememgr.png'>Package add</a> (modified in size)\n \
+\t- <a href='https://commons.wikimedia.org/wiki/File:Nuvola_mimetypes_txt.png'>List packages/About</a> (modified in size + added several resized Package icons)\n \
+\t- <a href='https://commons.wikimedia.org/wiki/File:Nuvola_apps_kghostview.png'>Log</a> (modified in size)\n" \
         --button=Close:0
 }; export -f F_ABOUT
 

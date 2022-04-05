@@ -44,6 +44,7 @@ F_MAIN(){
     F_LOG "$FUNCNAME: starting menu"
     $FYAD --title="$YTITLE" --scroll --image="$SICONS/grm_big.png" --width=850 --height=320 --fixed --scroll --text "\n  <b>$TFULLNAME</b>\n\n   GRM is a tool for managing a GrapheneOS repository\t\t\n\n" \
           --buttons-layout=spread \
+          --button=" About!$SICONS/about_48x48.png":"bash -c F_ABOUT" \
           --button=" Log!$SICONS/log_48x48.png":"$MYPATH/getlog" \
           --button=" List/Remove Apps!$SICONS/list_48x48.png!List current repo content or remove an existing app":"bash -c F_LISTAPPS" \
           --button=" Add/Update App!$SICONS/upload_48x48.png!Add a new app or update an existing one":"bash -c F_ADDAPP" 
