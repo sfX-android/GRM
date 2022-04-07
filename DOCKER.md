@@ -9,25 +9,42 @@ The main difference is that the http flavor does not need any further installati
 # Requirements
 
 ## Windows
-TBD
+
+### flavor: X
+
+1. install [docker](https://docs.docker.com/desktop/windows/install/)
+2. install [VcXsrv](https://sourceforge.net/projects/vcxsrv/) (see next lines)
+
+Unfortunately (?) I do not own a Windows system to test the following guide but it seems [VcXsrv](https://sourceforge.net/projects/vcxsrv/) is the best choice these days for using X on Windows. If you find any better or problems with that let me know ;)
+
+For installing VcXsrv follow this [Guide](https://dev.to/darksmile92/run-gui-app-in-linux-docker-container-on-windows-host-4kde) -> stop at _"Create a Dockerfile"_. you don't need to do that or the rest of the guide ;)
+
+### flavor: http
+1. install [docker](https://docs.docker.com/desktop/windows/install/)
+2. apart from a (modern) browser nothing else is needed
+
+To be able to run GRM you always need to ensure that before starting GRM:
+- docker is started
+
 
 ## Mac OS
 
 ### flavor: X
 1. install [docker](https://docs.docker.com/desktop/mac/install/)
-1. install [XQuartz](https://www.xquartz.org/)
-2. start XQuartz, select preferences menu -> "Security" tab -> check "Allow connections from network clients"
+2. install [XQuartz](https://www.xquartz.org/)
+3. start XQuartz, select preferences menu -> "Security" tab -> check "Allow connections from network clients"
 ![xquartz preferences](http://mamykin.com/static/d080424a8d38af04964f782f548ade22/57937/XQuartz_Preferences.png)
-3. allow local connections by docker. Open a terminal and execute: <br/>
+4. allow local connections by docker. Open a terminal and execute: <br/>
 `xhost +localhost`
-4. logout from your Mac (required) & reboot (to be sure)
+5. logout from your Mac (required) & reboot (to be sure)
 
 To be able to run GRM you always need to ensure that before starting GRM:
 - xquartz is started
 - docker is started
 
 ### flavor: http
-nothing needed other then a browser
+1. install [docker](https://docs.docker.com/desktop/mac/install/)
+2. apart from a (modern) browser nothing else is needed
 
 To be able to run GRM you always need to ensure that before starting GRM:
 - docker is started
