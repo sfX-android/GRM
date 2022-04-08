@@ -25,6 +25,7 @@ jobs:
       with:
         file: Dockerfile
         tags: grm:http-${{ github.ref_name }}
+        push: true
       #if: github.ref_type == 'tag'
       
     - name: Build & Push Docker X flavor
