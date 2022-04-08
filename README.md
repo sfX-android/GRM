@@ -28,13 +28,12 @@ You have to setup your repository like described in the Graphene OS README (curr
 
 ## Linux
 
-1. `git clone https://github.com/sfX-android/GRM.git /opt/GRM`
-2. create the file `/opt/GRM/custom.vars` with the following content:
-~~~
-export SSHUSER=<PUT-YOUR-USERNAME-HERE>
-export REPOSERVER=<PUT-YOUR-SSH-SERVER-HERE>
-export REPOPATH=<PUT-REMOTE-SERVERPATH-HERE>
-~~~
+a one-liner ;) 
+
+`git clone https://github.com/sfX-android/GRM.git /opt/GRM`
+
+After that you will find a file `GRM.desktop` in `/opt/GRM/`. If you like you can install it: `cp GRM.desktop ~/.local/share/applications/`
+(If you are using a different installation directory for GRM you obviously need to change `GRM.desktop` accordingly).
 
 ## Linux & docker: SSH keys
 
@@ -58,7 +57,7 @@ Create SSH keys for GRM to access your repository server. If your current Operat
    - docker: _use a SSH client and add the GRM_ed25519 key there for authentication_
    - Linux: `ssh -i /opt/GRM/ssh/GRM_ed25519 <PUT-YOUR-USERNAME-HERE>@<PUT-YOUR-SSH-SERVER-HERE>`
 5. if you see a hostkey verification prompt accept it but you should be logged in without specifying a password. If you get prompted for a password something is wrong in your setup which needs to be fixed first before you can proceed!
-
+6. Create [custom.vars](custom.vars.example) (copy from `custom.vars.example`) in `/opt/GRM/` and setup at least your remote server details there
 
 ## Docker
 
@@ -68,4 +67,4 @@ Follow the [Docker guide](DOCKER.md)
 
 ### Linux
 
-`/opt/GRM/grm`
+`/opt/GRM/grm` (or using the Start menu of your fav distro and search for `GRM` if you installed the Desktop file)
