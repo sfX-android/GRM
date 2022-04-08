@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=GRM
+Comment="[G]rapheneOS [R]epo [M]anager"
+Exec=/opt/GRM/grm
+Terminal=false
+Type=Application
+Icon=/opt/GRM/icons/grm_big.png
+Categories=Network
