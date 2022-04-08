@@ -2,10 +2,9 @@ name: http/X flavors CI
 
 on:
   push:
-    branches:
-      - main
     tags:
       - v1*
+      - latest
 
 jobs:
   build:
