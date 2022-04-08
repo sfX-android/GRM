@@ -1,3 +1,5 @@
+[![http/X flavors CI](https://github.com/sfX-android/GRM/actions/workflows/docker-image.yml/badge.svg?branch=latest)](https://github.com/sfX-android/GRM/actions/workflows/docker-image.yml)
+
 # Docker instructions
 
 GRM comes in 2 flavors: 
