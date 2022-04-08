@@ -1,0 +1,18 @@
+########## REQUIRED ############
+
+# IP or FQDN of your repo server
+export REPOSERVER=
+# your SSH user used for accessing your repo server
+export SSHUSER=
+# the full path on your repo server where you have cloned the graphene repo
+# (https://github.com/GrapheneOS/apps.grapheneos.org)
+export REPOPATH=
+
+########## OPTIONAL ############
+
+# remove these pattern from log before uploading to a paste service.
+# (delimiter is a space. patterns get replaced by SED so chars like / must be escaped)
+# default when unset can be found in grm.vars.
+# note1: the following will append always so no need to repeat whats defined in grm.vars.
+# note2: when you open the GRM log window you will see all actively used patterns at the top.
+#export RMUSRPATTERN="this and that" (will replace all 'this', all 'and', all 'that' occurences)
