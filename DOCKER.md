@@ -87,7 +87,7 @@ docker create --name=grm -p 8085:8085 \
     --env='REPOPATH=<PUT-REMOTE-SERVERPATH-HERE>' \
     --mount src="$(pwd)/apps",target=/0_APPS,type=bind \
     --mount src="$(pwd)/ssh",target=/opt/GRM/ssh,type=bind \
-    grm:http-<version>
+    steadfasterx/grm:http-<version>
 ~~~
  - **X flavor:**
 ~~~
@@ -97,7 +97,7 @@ docker create --name=grm --net=host --env='DISPLAY' \
     --env='REPOPATH=<PUT-REMOTE-SERVERPATH-HERE>' \
     --mount src="$(pwd)/apps",target=/0_APPS,type=bind \
     --mount src="$(pwd)/ssh",target=/opt/GRM/ssh,type=bind \
-    grm:X-<version>
+    steadfasterx/grm:X-<version>
 ~~~
 3. Optional: Instead of specifying the env variables above on container creation you can also specify these in the file [custom.vars](custom.vars.example). That way you do not need to re-create the container if your server name changes or if you want to connect to multiple repo servers.
 For this just add the following line after the last `--mount ...`:
@@ -111,6 +111,3 @@ For this just add the following line after the last `--mount ...`:
 2. flavor:
      - **X**: GRM will directly start
      - **http**: Open your web browser and connect to: http://localhost:8085
-
-
-
