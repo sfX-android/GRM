@@ -1,0 +1,15 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Build Docker http flavor
+      run: docker build . --file Dockerfile --tag grm:http-github.ref_name
+      if: github.ref_type == 'tag'
