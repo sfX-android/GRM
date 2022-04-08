@@ -45,7 +45,7 @@
 VARS="${0%/*}/grm.vars"
 
 source "$VARS"
-[ $? -ne 0 ]&& echo "ERROR: including $VARS" && exit 3
+[ $? -ne 0 ] && echo "$0 - ERROR: including $VARS" && exit 3
 
 ######################################################################################
 
@@ -54,7 +54,7 @@ F_LOG(){
     # takes 1 argument
     # 1 => Message to log/echo (can handle \t and \n)
   
-    echo -e "$(date '+%F %T'): $1" >> $LOG
+    echo -e "$(date '+%F %T') - $1" >> $LOG
 }; export -f F_LOG
 
 # echo output and save it in a log as well
@@ -217,6 +217,11 @@ F_ABOUT(){ F_LOG "$FUNCNAME: started"
         --button=Close:0
 }; export -f F_ABOUT
 
+# load dynamic variables
+F_DYNVARS(){
+    source .dyn.vars
+}; export -f F_DYNVARS
+
 # Update everything!
 F_UPDATE(){ F_LOG "$FUNCNAME: started"
     # takes no arguments
@@ -239,8 +244,9 @@ F_UPDATE(){ F_LOG "$FUNCNAME: started"
 
 # prepare remote repo
 F_PREPARE(){ F_LOG "$FUNCNAME: started with this args: $@"
+    F_DYNVARS
 
-    CMD="rm upload/*"
+    CMD="rm $UPLPATH/*"
     F_SSHCMD
 
     SCPFILE=/tmp/$UPDATEEXEC
@@ -252,16 +258,16 @@ cd $REPOPATH
 
 ERR=\$?
 if [ \$ERR -eq 0 ];then
-  echo "Updated repo successfully!"
+  echo "Updated repo successfully!" >> $REMLOG
 else
-  echo "Error \$ERR occured while updating repo!"
+  echo "Error \$ERR occured while updating repo!" >> $REMLOG
 fi
 exit \$ERR
 _EOCMD
     chmod +x $SCPFILE
     F_SCPFILE
 
-    F_LOG "$FUNCNAME ended with $ERR"
+    F_LOG "$FUNCNAME: ended with $ERR"
 }; export -f F_PREPARE
 
 # will set any host key as valid so should be used once only on initial use
@@ -278,7 +284,7 @@ F_SSHCMD(){ F_LOG "$FUNCNAME: started with this args: $@"
     ssh -o 'IdentitiesOnly yes' -i $SSHKEY ${SSHUSER}@${REPOSERVER} "$CMD"
     ERR=$?
 
-    F_LOG "$FUNCNAME ended with $ERR"
+    F_LOG "$FUNCNAME: ended with $ERR"
     return $ERR
 }; export -f F_SSHCMD
 
@@ -288,53 +294,69 @@ F_SCPEXEC(){ F_LOG "$FUNCNAME: started with this args: $@"
     [ -z "$SCPFILE" ] && F_LOG "empty SCPFILE var!!!!" && return 3
     chmod +x $SCPFILE
     F_SCPFILE
-    CMD="./upload/${SCPFILE##*/}"
+    CMD="${UPLPATH}/${SCPFILE##*/}"
     F_SSHCMD
 
-    F_LOG "$FUNCNAME ended with $ERR"
+    F_LOG "$FUNCNAME: ended with $ERR"
     return $ERR
 }; export -f F_SCPEXEC
 
-# run a COMPLEX remote command
+# just scp a file without running it
 F_SCPFILE(){ F_LOG "$FUNCNAME: started with this args: $@"
     # requires SCPFILE var to be set
     [ -z "$SCPFILE" ] && F_LOG "empty SCPFILE var!!!!" && return 3
 
-    scp -p -o 'IdentitiesOnly yes' -i $SSHKEY $SCPFILE ${SSHUSER}@${REPOSERVER}:./upload/ 2>&1 >> $LOG
+    scp -p -o 'IdentitiesOnly yes' -i $SSHKEY $SCPFILE ${SSHUSER}@${REPOSERVER}:${UPLPATH}/ 2>&1 >> $LOG
     ERR=$?
     if [ "$ERR" -eq 0 ];then
-        F_LOG "$FUNCNAME transferring $SCPFILE to $REPOSERVER was successful"
+        F_LOG "$FUNCNAME: transferring $SCPFILE to $REPOSERVER was successful"
     else
-        F_LOG "$FUNCNAME Error $ERR occured while transferring $SCPFILE to $REPOSERVER"
+        F_LOG "$FUNCNAME: Error $ERR occured while transferring $SCPFILE to $REPOSERVER"
     fi
 
-    F_LOG "$FUNCNAME ended with $ERR"
+    F_LOG "$FUNCNAME: ended with $ERR"
     return $ERR
 }; export -f F_SCPFILE
 
+# fetch remote logs from repo server
+F_FETCHLOG(){ F_LOG "$FUNCNAME: started with this args: $@"
+    [ -f /tmp/$TNAME.remote.log ] && rm /tmp/$TNAME.remote.log
+    scp -p -o 'IdentitiesOnly yes' -i $SSHKEY ${SSHUSER}@${REPOSERVER}:${REMLOG} /tmp/$TNAME.remote.log 2>&1 >> $LOG
+    ERR=$?
+    if [ "$ERR" -eq 0 ];then
+        F_LOG "$FUNCNAME: fetching $TNAME.remote.log from $REPOSERVER was successful"
+        CMD="rm ${REMLOG}"
+        F_SSHCMD
+        cat /tmp/$TNAME.remote.log >> $LOG
+    else
+        F_LOG "$FUNCNAME: Error $ERR occured while fetching $TNAME.remote.log from $REPOSERVER"
+    fi
+    F_LOG "$FUNCNAME: ended with $ERR"
+}; export -f F_FETCHLOG
+
 # calc message length
 F_MSGLEN(){
-    F_LOG "$FUNCNAME started with $1"
+    F_LOG "$FUNCNAME: started with $1"
     MSG="$1"
     MSGLENGTH=$((${#MSG} + 300))
-    F_LOG "$FUNCNAME calculated a message length of: $MSGLENGTH"
+    F_LOG "$FUNCNAME: calculated a message length of: $MSGLENGTH"
     echo $MSGLENGTH
-    F_LOG "$FUNCNAME ended"
+    F_LOG "$FUNCNAME: ended"
 }; export -f F_MSGLEN
 
 # wait dialog
 F_WAITBOX(){
-    F_LOG "$FUNCNAME started with $1"
+    F_LOG "$FUNCNAME: started with $1"
     unset MSG
     MSG="$1"
-    MINLENGTH=$(F_MSGLEN "SORM v$VERSION")
+    MINLENGTH=$(F_MSGLEN "$TNAME v$VERSION")
     MSGLENGTH=$(F_MSGLEN "$MSG")
     [ "$MSGLENGTH" -lt "$MINLENGTH" ] && MSGLENGTH=$MINLENGTH
     for i in $(seq 20 100);do echo $i ; sleep 1; done | $FYAD --width=$MSGLENGTH --progress --auto-close --pulsate --hide-text --text "\n$MSG" &
     WBPID=$!
-    F_LOG "$FUNCNAME WBPID is $WBPID"
-    F_LOG "$FUNCNAME ended"
-    echo $WBPID > /tmp/sorm_$FUNCNAME.pid
+    F_LOG "$FUNCNAME: WBPID is $WBPID"
+    F_LOG "$FUNCNAME: ended"
+    echo $WBPID > /tmp/${TNAME}_$FUNCNAME.pid
 }; export -f F_WAITBOX
 
 # list all repo apps
@@ -343,9 +365,11 @@ F_LISTAPPS(){ F_LOG "$FUNCNAME: started with this args: $@"
 
     unset FORMFIELDS
 
+    F_DYNVARS
+
     F_WAITBOX "...parsing remote app repo on $REPOSERVER"
-    KPID=$(cat /tmp/sorm_F_WAITBOX.pid)
-    F_LOG "$FUNCNAME PID is $KPID"
+    KPID=$(cat /tmp/${TNAME}_F_WAITBOX.pid)
+    F_LOG "$FUNCNAME: PID is $KPID"
 
     CMD="jq -r .time $REPOPATH/apps/metadata.0.json"
     LTIME=$(F_SSHCMD)
@@ -353,47 +377,57 @@ F_LISTAPPS(){ F_LOG "$FUNCNAME: started with this args: $@"
 
     SCPFILE="/tmp/cmd.sh"
     cat > $SCPFILE << _EOFCMD
+#!/bin/bash
+[ ! -d "$REMLOGPATH" ] && mkdir -p $REMLOGPATH
 for p in \$(jq -r '.apps | keys[]' $REPOPATH/apps/metadata.0.json);do 
-    printf \$p: ; jq -r '.apps.'\"\$p\"'.stable[].label' $REPOPATH/apps/metadata.0.json
+    echo "\$(date '+%F %T') - cmd.sh@${REPOSERVER}: parsing metadata for \$p -> $APPSTATE" >> $REMLOG
+    PKGNAME=\$(printf \$p: ; jq -r '.apps.'\"\$p\"'.$APPSTATE[].label' $REPOPATH/apps/metadata.0.json 2>> $REMLOG)
+    if [ \$? -eq 0 ];then
+        echo "\$p:\$PKGNAME"
+        echo "\$(date '+%F %T') - cmd.sh@${REPOSERVER}: parsed metadata correctly for \$p -> \$PKGNAME" >> $REMLOG
+    else
+        echo "\$(date '+%F %T') - cmd.sh@${REPOSERVER}: WARNING: could not parse metadata for \$p. This likely just means it has not a state of '$APPSTATE' and so can be safely ignored" >> $REMLOG
+        echo -e "\$(date '+%F %T') - cmd.sh@${REPOSERVER}: command was: jq -r '.apps.\"\$p\".$APPSTATE[].label' $REPOPATH/apps/metadata.0.json\n" >> $REMLOG
+    fi
 done
 _EOFCMD
     ALLAPPS=$(F_SCPEXEC | tr -d " ")
 
     kill $KPID
 
-    F_LOG "$FUNCNAME ALLAPPS: $ALLAPPS"
+    F_LOG "$FUNCNAME: ALLAPPS: $ALLAPPS"
 
     # list all apps
     for a in $ALLAPPS; do
         LISTFIELDS="$LISTFIELDS false ${a/*:} ${a/:*}"
     done
     F_LOG "$ALLAPPS, $LISTFIELDS"
-    RMAPPS=$($FYAD --height=800 --width=500 --print-column=3 --text "\nThe following apps are currently deployed on $REPOSERVER\nLast updated on: $RTIME\n" --list --checklist --column=Selection:CHK --column="App name:TXT" --column="Package name:TXT" $LISTFIELDS --button=Close:0 --button="Remove Selected:10" | tr "\n" " ")
+    RMAPPS=$($FYAD --height=500 --width=700 --print-column=3 --text "\nThe following <b>$APPSTATE</b> apps are currently deployed on $REPOSERVER\nLast updated on: <b>$RTIME</b>\n" --list --checklist --column=Selection:CHK --column="App name:TXT" --column="Package name:TXT" $LISTFIELDS --button=Close:0 --button="Remove Selected:10" | tr "\n" " ")
 
     # remove apps if any selected
-    F_LOG "$FUNCNAME Apps selected for removal: $RMAPPS"
+    F_LOG "$FUNCNAME: Apps selected for removal: $RMAPPS"
     [ ! -z "$RMAPPS" ] && F_RMAPPS
 
-    F_LOG "$FUNCNAME ended"
+    F_LOG "$FUNCNAME: ended"
 }; export -f F_LISTAPPS
 
 # delete apps
 F_RMAPPS(){ F_LOG "$FUNCNAME: started with this args: $@"
-    [ -z "$RMAPPS" ] && F_LOG "$FUNCNAME empty RMAPPS var!!!!" && return 3
+    [ -z "$RMAPPS" ] && F_LOG "$FUNCNAME: empty RMAPPS var!!!!" && return 3
 
     # prep orphan dir
     CMD="[ ! -d $REPOPATH/deleted-apps/ ] && mkdir $REPOPATH/deleted-apps/"
     F_SSHCMD
 
     for app in $(echo "$RMAPPS" | tr "|" " ");do
-        CMD="cp -a $REPOPATH/apps-stable/$app $REPOPATH/deleted-apps/ ; rm -rf $REPOPATH/apps-stable/$app"
+        CMD="cp -a $REPOPATH/apps-${APPSTATE}/$app $REPOPATH/deleted-apps/ ; rm -rf $REPOPATH/apps-${APPSTATE}/$app"
         F_SSHCMD
-        [ $ERR -ne 0 ] && F_LOG "$FUNCNAME Error $ERR occured while uploading $apk" && F_MSGE 800 "Error $ERR occured while removing $app"
+        [ $ERR -ne 0 ] && F_LOG "$FUNCNAME: Error $ERR occured while uploading $apk" && F_MSGE 800 "Error $ERR occured while removing $app"
         [ $ERR -ne 0 ] && return 3
     done
 
     F_ACTIVATE
-    F_LOG "$FUNCNAME ended"
+    F_LOG "$FUNCNAME: ended"
 }; export -f F_RMAPPS
 
 # add app
@@ -404,18 +438,18 @@ F_ADDAPP(){ F_LOG "$FUNCNAME: started with this args: $@"
 
     for apk in $SELAPK;do
         F_WAITBOX "... uploading to $REPOSERVER:\n\n\t${apk##*/}\n"
-        KPID=$(cat /tmp/sorm_F_WAITBOX.pid)
+        KPID=$(cat /tmp/${TNAME}_F_WAITBOX.pid)
         SCPFILE=$apk
         F_SCPFILE
         ERR=$?
         kill $KPID
-        [ $ERR -ne 0 ] && F_LOG "$FUNCNAME Error $ERR occured while uploading $apk" && F_MSGE 800 "Error $ERR occured while uploading:\n\n$apk"
+        [ $ERR -ne 0 ] && F_LOG "$FUNCNAME: Error $ERR occured while uploading $apk" && F_MSGE 800 "Error $ERR occured while uploading:\n\n$apk"
         [ $ERR -ne 0 ] && return 3
         SCPFILE="/tmp/${apk##*/}.sh"
         cat > $SCPFILE << _EOCMD
-PKGNAME=\$(aapt d badging upload/${apk##*/} | awk '/package/{gsub("name=|'"'"'","");  print \$2}')
-[ ! -d "$REPOPATH/apps-stable/\$PKGNAME" ] && mkdir -p $REPOPATH/apps-stable/\$PKGNAME
-mv upload/${apk##*/} $REPOPATH/apps-stable/\$PKGNAME/base.apk
+PKGNAME=\$(aapt d badging ${UPLPATH}/${apk##*/} | awk '/package/{gsub("name=|'"'"'","");  print \$2}')
+[ ! -d "$REPOPATH/apps-${APPSTATE}/\$PKGNAME" ] && mkdir -p $REPOPATH/apps-${APPSTATE}/\$PKGNAME
+mv ${UPLPATH}/${apk##*/} $REPOPATH/apps-${APPSTATE}/\$PKGNAME/base.apk
 _EOCMD
         F_SCPEXEC
     done
@@ -423,20 +457,29 @@ _EOCMD
     F_MSGOK 500 "Successfully uploaded all APKs!"
     F_ACTIVATE
 
-    F_LOG "$FUNCNAME ended"
+    F_LOG "$FUNCNAME: ended"
 }; export -f F_ADDAPP
 
 F_ACTIVATE(){ F_LOG "$FUNCNAME: started with this args: $@"
     F_WAITBOX "... activating APK changes on $REPOSERVER"
-    KPID=$(cat /tmp/sorm_F_WAITBOX.pid)
+    KPID=$(cat /tmp/${TNAME}_F_WAITBOX.pid)
     # activate changes
-    CMD="./upload/$UPDATEEXEC"
+    CMD="${UPLPATH}/$UPDATEEXEC"
     F_SSHCMD
     if [ $? -eq 0 ];then
         F_MSGOK 400 "Repo update finished successfully!"
     else
-        F_LOG "$FUNCNAME Error $? occured while activating new APKs" && F_MSGE 800 "Error occured while activating repo changes! SHARE THE LOG!"
+        F_LOG "$FUNCNAME: Error $? occured while activating new APKs" && F_MSGE 800 "Error occured while activating repo changes! SHARE THE LOG!"
     fi
     kill $KPID
-    F_LOG "$FUNCNAME ended"
+    F_LOG "$FUNCNAME: ended"
 }; export -f F_ACTIVATE
+
+# remove sensitive data from log before uploading
+F_CLEANLOG(){  F_LOG "$FUNCNAME: started with this args: $@"
+    cp -v $LOG ${LOG}.paste >> $LOG 2>&1
+    for pat in $RMPATTERN;do
+        sed -i "s/$pat/REDACTED/g" ${LOG}.paste 2>> $LOG
+    done
+    F_LOG "$FUNCNAME: ended"
+}; export -f F_CLEANLOG

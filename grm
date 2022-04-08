@@ -22,12 +22,12 @@
 # the vars
 VARS="${0%/*}/grm.vars"
 source $VARS
-[ $? -ne 0 ] && "ERROR: Missing requirement <$VARS>." && exit 3
+[ $? -ne 0 ] && "ERROR: Missing requirement: >$VARS<" && exit 3
 
 # the functions
 FUNCS="${0%/*}/grm.func"
 source $FUNCS
-[ $? -ne 0 ] && "ERROR: Missing requirement <$FUNCS>." && exit 3
+[ $? -ne 0 ] && "ERROR: Missing requirement: >$FUNCS<" && exit 3
 
 # start logging
 [ -f "$LOG" ] && echo "backing up old logfile...." && cp -f $LOG ${LOG}.old
@@ -39,10 +39,16 @@ F_LOG "OS (lsb): $(lsb_release -a)"
 F_LOG "yad: $(yad --version)"
 F_LOG "systemd summary:\n $(hostnamectl status |grep -v ID)\n"
 
+# init app state
+echo export APPSTATE=stable > .dyn.vars
+source .dyn.vars
+
 # main func
 F_MAIN(){
     F_LOG "$FUNCNAME: starting menu"
-    $FYAD --title="$YTITLE" --scroll --image="$SICONS/grm_big.png" --width=850 --height=320 --fixed --scroll --text "\n  <b>$TFULLNAME</b>\n\n   GRM is a tool for managing a GrapheneOS repository\t\t\n\n" \
+    $FYAD --title="$YTITLE" --scroll --image="$SICONS/grm_big.png" --width=850 --height=320 --fixed --scroll --text "\n   <b>$TFULLNAME</b>\n\n   $TNAME is a tool for managing a GrapheneOS repository\t\t\n\n   Choose either <i>stable</i> or <i>beta</i>.\n   Any <i>beta</i> app HAS TO exist as a <i>stable</i> one as well.\n   Having an app just in <i>beta</i> is <b>not</b> supported (by GrapheneOS).\n   If you are unsure what to choose use <i>stable</i>:\n" \
+          --form --field='\t\t\t\t\t\t\t\t\t\t\t\t  State:CB' '^stable!beta' \
+          --changed-action="sh -c 'echo export APPSTATE=%1 > .dyn.vars'" \
           --buttons-layout=spread \
           --button=" About!$SICONS/about_48x48.png":"bash -c F_ABOUT" \
           --button=" Log!$SICONS/log_48x48.png":"$MYPATH/getlog" \
