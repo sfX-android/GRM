@@ -55,16 +55,20 @@ You can decide if you want to build or use a prebuilt image. If you are unsure I
 
 ### prebuilt
 
+Recommended and easiest approach.
+
 Open a terminal and execute: `docker pull steadfasterx/grm:X-<version>` (where `<version>` is the v[ersion number](https://hub.docker.com/repository/docker/steadfasterx/grm/tags))
 
 
 ### build
 
+If you want to build it instead:
+
 1. downlad the GRM repository (e.g. by git or in your browser from [here](https://github.com/sfX-android/GRM/tags)). Ensure you extract it when not using git commands.
 2. Open a terminal and ensure you are in the directory of the downloaded GRM repository and execute:<br/>`docker build -t grm:latest .` (noted the dot at the end?)
 
 
-### create the GRM container (one time)
+### create the GRM container (one time, prebuilt or self-built)
 
 when creating the container 2 paths will be mapped which are both needed so GRM works properly:
 
@@ -82,10 +86,18 @@ docker create --name=grm -p 8085:8085 \
     --env='REPOPATH=<PUT-REMOTE-SERVERPATH-HERE>' \
     --mount src="$(pwd)/apps",target=/0_APPS,type=bind \
     --mount src="$(pwd)/ssh",target=/opt/GRM/ssh,type=bind \
-    grm:latest
+    grm:<flavor>-<version>
 ~~~
-Obviously replace the 3 `<PUT-....>` tags with real values!
+Obviously replace:
+- the three `<PUT-....>` tags with real values!
+- `grm:<flavor>-<version>` with the flavor and version (e.g. `grm:X-latest` or `grm:http-1.3`)
 
+3. Optional: Instead of specifying the env variables above on container creation you can also specify these in the file [custom.vars](custom.vars.example). That way you do not need to re-create the container if your server name changes or if you want to connect to multiple repo servers.
+For this just add the following line after the last `--mount ...`:
+  
+`    --mount src="$(pwd)/custom.vars",target=/opt/GRM/custom.vars,type=bind \`
+
+  
 ## start GRM
 
 1. `docker start grm`
