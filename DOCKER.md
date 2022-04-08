@@ -68,7 +68,7 @@ If you want to build it instead:
 2. Open a terminal and ensure you are in the directory of the downloaded GRM repository and execute:<br/>`docker build -t grm:latest .` (noted the dot at the end?)
 
 
-### create the GRM container (one time, prebuilt or self-built)
+### Windows | Mac OS: create the GRM container (one time, prebuilt or self-built)
 
 when creating the container 2 paths will be mapped which are both needed so GRM works properly:
 
@@ -78,7 +78,8 @@ when creating the container 2 paths will be mapped which are both needed so GRM 
 See [SSH keys](README.md#docker-users-only) for where to find them and their meaning.
 
 1. Open a terminal/shell in the directory where these 2 directories are located. It can be anywhere you like just ensure that the `ssh/` dir contains your ssh key and `apps/` will contain your APKs.
-2. Create the container with:
+2. Create the container<br/>(replace `<PUT-....>` tags with real values and `grm:<flavor>-<version>` with the flavor and version (e.g. `grm:X-latest` or `grm:http-v1.3`)):
+ - **http flavor:**
 ~~~
 docker create --name=grm -p 8085:8085 \
     --env='SSHUSER=<PUT-YOUR-USERNAME-HERE>' \
@@ -86,12 +87,18 @@ docker create --name=grm -p 8085:8085 \
     --env='REPOPATH=<PUT-REMOTE-SERVERPATH-HERE>' \
     --mount src="$(pwd)/apps",target=/0_APPS,type=bind \
     --mount src="$(pwd)/ssh",target=/opt/GRM/ssh,type=bind \
-    grm:<flavor>-<version>
+    grm:http-<version>
 ~~~
-Obviously replace:
-- the three `<PUT-....>` tags with real values!
-- `grm:<flavor>-<version>` with the flavor and version (e.g. `grm:X-latest` or `grm:http-1.3`)
-
+ - **X flavor:**
+~~~
+docker create --name=grm --net=host --env='DISPLAY' \
+    --env='SSHUSER=<PUT-YOUR-USERNAME-HERE>' \
+    --env='REPOSERVER=<PUT-YOUR-SSH-SERVER-HERE>' \
+    --env='REPOPATH=<PUT-REMOTE-SERVERPATH-HERE>' \
+    --mount src="$(pwd)/apps",target=/0_APPS,type=bind \
+    --mount src="$(pwd)/ssh",target=/opt/GRM/ssh,type=bind \
+    grm:X-<version>
+~~~
 3. Optional: Instead of specifying the env variables above on container creation you can also specify these in the file [custom.vars](custom.vars.example). That way you do not need to re-create the container if your server name changes or if you want to connect to multiple repo servers.
 For this just add the following line after the last `--mount ...`:
   
