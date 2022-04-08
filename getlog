@@ -22,12 +22,24 @@ FUNCS="${0%/*}/grm.func"
 source $FUNCS
 
 F_LOG "getlog script started"
-cat $LOG | $FYAD --title="$YTITLE - DEBUGLOG" --width=1000 --height=800 --wrap --text-info --button="Upload/Paste this log":99 --button=Close:0 
+
+F_WAITBOX "... fetching logs from $REPOSERVER\n"
+KPID=$(cat /tmp/${TNAME}_F_WAITBOX.pid)
+F_FETCHLOG
+kill $KPID
+
+PRETTYPAT=$(echo "$RMPATTERN" | tr ' ' ',')
+
+cat $LOG | $FYAD --title="$YTITLE - DEBUGLOG" --width=800 --height=500 --wrap --text "The following pattern will be automatically removed before uploading:\n<i>$PRETTYPAT</i>\n" --text-info --button="Upload/Paste this log":99 --button=Close:0 
+ANSW=$?
+
+# remove sensitive data from log before uploading
+F_CLEANLOG
 
 # upload log to a paste service
-if [ $? -eq 99 ];then
+if [ $ANSW -eq 99 ];then
     for pastes in haste ix transfer; do
-        PASTEURL=$($APASTE -s -p $pastes $LOG | egrep "Direct")
+        PASTEURL=$($APASTE -s -p $pastes ${LOG}.paste | egrep "Direct")
         PASTEURL=${PASTEURL/Direct: /}
         echo "${PASTEURL}" | grep -q http
         PASTEERR=$?
