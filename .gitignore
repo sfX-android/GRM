@@ -2,3 +2,4 @@
 ssh/
 custom.vars
 *.aio
+/.dyn.vars
