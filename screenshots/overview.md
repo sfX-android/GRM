@@ -1,11 +1,11 @@
 # GRM main screen
 
-![main](screenshots/main.png)
+![main](main.png)
 
 # GRM List/Remove Apps
 
-![main](screenshots/list.png)
+![main](list.png)
 
 # GRM Log window
 
-![main](screenshots/log.png)
+![main](log.png)
