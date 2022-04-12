@@ -5,6 +5,8 @@ GRM - [G]rapheneOS [R]epo [M]anager
 
 A graphical UI for managing a custom Apps [repository](https://github.com/GrapheneOS/apps.grapheneos.org) for [GrapheneOS](https://grapheneos.org/)
 
+Click [here for Screenshots](screenshots/overview.md) :)
+
 
 ## IMPORTANT HINT
 
