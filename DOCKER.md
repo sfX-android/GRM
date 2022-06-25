@@ -59,7 +59,7 @@ You can decide if you want to build or use a prebuilt image. If you are unsure I
 
 Recommended and easiest approach.
 
-Open a terminal and execute: `docker pull steadfasterx/grm:X-<version>` (where `<version>` is the v[ersion number](https://hub.docker.com/repository/docker/steadfasterx/grm/tags))
+Open a terminal and execute: `docker pull steadfasterx/grm:X-<version>` (where `<version>` is the v[ersion number](https://hub.docker.com/r/steadfasterx/grm/tags))
 
 
 ### build
