@@ -21,14 +21,14 @@ jobs:
         password: ${{ secrets.DOCKERHUB_TOKEN }}
 
     - name: X flavor
-      uses: docker/build-push-action@v2.10.0
+      uses: docker/build-push-action@v4.0.0
       with:
         file: Dockerfile.X
         tags: ${{ secrets.DOCKERHUB_USERNAME }}/grm:X-${{ github.ref_name }}
         push: true
         
     - name: http flavor
-      uses: docker/build-push-action@v2.10.0
+      uses: docker/build-push-action@v4.0.0
       with:
         file: Dockerfile
         tags: ${{ secrets.DOCKERHUB_USERNAME }}/grm:http-${{ github.ref_name }}
