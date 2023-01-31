@@ -26,7 +26,7 @@ While GRM runs on any Linux natively it can be used on any Operating System whic
 
 ## Apps Repository
 
-You have to setup your repository like described in the Graphene OS README (currently available [here](https://github.com/steadfasterX/apps.grapheneos.org/blob/sfX-guide/README.md) until accepted [upstream](https://github.com/GrapheneOS/apps.grapheneos.org))
+You have to setup your repository as described [here](SERVER.md)
 
 # Installation
 

@@ -1,6 +1,7 @@
 #!/bin/bash
 ##################################################################################
 # Copyright 2022 steadfasterX <steadfasterX |at| gmail - com>
+# Copyright 2023 steadfasterX <steadfasterX |at| gmail - com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -40,15 +41,19 @@ F_LOG "yad: $(yad --version)"
 F_LOG "systemd summary:\n $(hostnamectl status |grep -v ID)\n"
 
 # init app state
-echo export APPSTATE=stable > .dyn.vars
-source .dyn.vars
+# uses always first one as default:
+export DEFAULTCHAN="${CHANNELS/!*}"
+export DEFAULTSRC="${APPSRCS/!*}"
+echo export APPSTATE=$DEFAULTCHAN APPSRC=$DEFAULTSRC > .dyn.vars
+F_LOG "Starting with these defaults: $DEFAULTCHAN - $DEFAULTSRC"
 
 # main func
 F_MAIN(){
     F_LOG "$FUNCNAME: starting menu"
-    $FYAD --title="$YTITLE" --scroll --image="$SICONS/grm_big.png" --width=850 --height=320 --fixed --scroll --text "\n   <b>$TFULLNAME</b>\n\n   $TNAME is a tool for managing a GrapheneOS repository\t\t\n\n   Choose either <i>stable</i> or <i>beta</i>.\n   Any <i>beta</i> app HAS TO exist as a <i>stable</i> one as well.\n   Having an app just in <i>beta</i> is <b>not</b> supported (by GrapheneOS).\n   If you are unsure what to choose use <i>stable</i>:\n" \
-          --form --field='\t\t\t\t\t\t\t\t\t\t\t\t  State:CB' '^stable!beta' \
-          --changed-action="sh -c 'echo export APPSTATE=%1 > .dyn.vars'" \
+    $FYAD --title="$YTITLE" --scroll --image="$SICONS/grm_big.png" --width=650 --height=350 --scroll --text "\n   <b>$TFULLNAME</b>\n\n   $TNAME is a tool for managing a GrapheneOS repository\t\t\n\n   Choose either <i>stable</i> or <i>beta</i>.\n   Any <i>beta</i> app HAS TO exist as a <i>stable</i> one as well.\n   Having an app just in <i>beta</i> is <b>not</b> supported (by GrapheneOS).\n   If you are unsure what to choose use <i>stable</i>:\n" \
+          --form --field='\t\t\t\t\t\t\t\t\t\t\t\t  State:CB' '^'$CHANNELS \
+          --form --field='\t\t\t\t\t\t\t\t\t\t\t\t  Source:CB' '^'$APPSRCS \
+          --changed-action="sh -c 'echo -e export APPSTATE=%1 APPSRC=%2> .dyn.vars'" \
           --buttons-layout=spread \
           --button=" About!$SICONS/about_48x48.png":"bash -c F_ABOUT" \
           --button=" Log!$SICONS/log_48x48.png":"$MYPATH/getlog" \

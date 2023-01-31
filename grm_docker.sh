@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 ##################################################################################
 # Copyright 2022 steadfasterX <steadfasterX |at| gmail - com>
+# Copyright 2023 steadfasterX <steadfasterX |at| gmail - com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
