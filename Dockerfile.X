@@ -29,7 +29,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install -y packagekit-gtk3-module yad
 RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # add latest GRM to the image
-ADD https://github.com/sfX-android/GRM/archive/refs/tags/v1-latest.tar.gz /opt/GRM.tgz
+ADD https://github.com/sfX-android/GRM/archive/refs/tags/latest.tar.gz /opt/GRM.tgz
 RUN tar --one-top-level=/opt/GRM --strip-components=1 -xvzf /opt/GRM.tgz
 RUN rm /opt/GRM.tgz
 
