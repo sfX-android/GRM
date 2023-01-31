@@ -3,7 +3,8 @@ name: http/X flavors CI
 on:
   push:
     tags:
-      - v*
+      - v1*
+      - v2*
       - latest
 
 jobs:
