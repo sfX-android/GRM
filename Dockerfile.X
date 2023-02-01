@@ -22,7 +22,8 @@ CMD ["/sbin/my_init"]
 
 # install required packages
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y software-properties-common python3-launchpadlib
-RUN DEBIAN_FRONTEND=noninteractive add-apt-repository "deb http://archive.ubuntu.com/ubuntu $(lsb_release -sc) main universe restricted multiverse"
+RUN apt-get update
+RUN apt-get -y ugrade
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y packagekit-gtk3-module yad file
 
 # Clean up APT when done.
