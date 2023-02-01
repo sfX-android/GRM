@@ -15,7 +15,7 @@
 #
 # See https://github.com/phusion/baseimage-docker/blob/master/Changelog.md
 # for a list of version numbers.
-FROM phusion/baseimage:focal-1.2.0
+FROM phusion/baseimage:jammy-1.0.1
 
 # Use baseimage-docker's init system.
 CMD ["/sbin/my_init"]
@@ -34,4 +34,6 @@ RUN tar --one-top-level=/opt/GRM --strip-components=1 -xvzf /opt/GRM.tgz
 RUN rm /opt/GRM.tgz
 
 # run GRM
+CMD touch /tmp/GRM.log
+CMD tail -f /tmp/GRM.log &
 CMD /opt/GRM/grm
