@@ -22,7 +22,6 @@ CMD ["/sbin/my_init"]
 
 # install required packages
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y software-properties-common
-RUN DEBIAN_FRONTEND=noninteractive add-apt-repository "deb http://archive.ubuntu.com/ubuntu $(lsb_release -sc) main universe restricted multiverse"
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y packagekit-gtk3-module yad file
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y build-essential libgtk-3-dev libcairo2-dev libglib2.0-dev pkg-config
 
