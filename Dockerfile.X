@@ -23,7 +23,7 @@ CMD ["/sbin/my_init"]
 # install required packages
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y software-properties-common python3-launchpadlib
 RUN apt-get update
-RUN apt-get -y upgrade
+#RUN apt-get -y upgrade
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y packagekit-gtk3-module yad file
 
 # Clean up APT when done.
